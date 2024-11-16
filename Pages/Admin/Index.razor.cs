@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace AdminApp.Pages.Index
+namespace AdminApp.Pages.Admin
 {
     public partial class Index : ComponentBase
     {
