@@ -5,7 +5,7 @@ namespace AdminApp.Pages.Index
     public partial class Index : ComponentBase
     {
         [Inject]
-        private NavigationManager NavigationManager { get; set; }
+        private NavigationManager? NavigationManager { get; set; }
 
         private string _filterQuery = string.Empty;
         private string FilterQuery
@@ -133,7 +133,7 @@ namespace AdminApp.Pages.Index
                     IsBlocked = false,
                 },
             };
-        private List<User> filteredUsers;
+        private List<User>? filteredUsers;
 
         protected override void OnInitialized()
         {
@@ -193,16 +193,16 @@ namespace AdminApp.Pages.Index
             NavigationManager.NavigateTo("/login");
         }
 
-        private string GetRowClass(User user)
+        private static string GetRowClass(User user)
         {
             return user.IsBlocked ? "text-muted text-decoration-line-through" : string.Empty;
         }
 
         public class User
         {
-            public string Name { get; set; }
-            public string Email { get; set; }
-            public string LastSeen { get; set; }
+            public required string Name { get; set; }
+            public required string Email { get; set; }
+            public required string LastSeen { get; set; }
             public bool IsBlocked { get; set; }
             public bool IsSelected { get; set; }
         }
