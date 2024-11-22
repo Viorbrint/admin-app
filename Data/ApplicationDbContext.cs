@@ -1,16 +1,17 @@
 using AdminApp.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AdminApp.Data;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-    : DbContext(options)
+    : IdentityDbContext<User>(options)
 {
-    public required DbSet<User> Users { get; set; }
     public required DbSet<Login> Logins { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
         modelBuilder
             .Entity<Login>()
             .HasOne(l => l.User)

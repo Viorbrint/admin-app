@@ -1,11 +1,20 @@
-﻿@using AdminApp.Shared
-
-<Router AppAssembly="@typeof(App).Assembly">
+﻿<Router AppAssembly="@typeof(App).Assembly">
     <Found Context="routeData">
-        <RouteView RouteData="@routeData" />
+        <AuthorizeRouteView 
+            RouteData="@routeData" 
+            NotAuthorized="@((context) => RedirectToLogin)" />
         <FocusOnNavigate RouteData="@routeData" Selector="h1" />
     </Found>
     <NotFound>
         <NotFound />
     </NotFound>
 </Router>
+
+@code {
+    private RenderFragment RedirectToLogin => builder =>
+    {
+        builder.OpenComponent<RedirectToLogin>(0);
+        builder.CloseComponent();
+    };
+}
+

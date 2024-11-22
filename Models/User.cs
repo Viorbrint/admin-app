@@ -1,13 +1,21 @@
-namespace AdminApp.Models;
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Identity;
 
-public class User
+namespace AdminApp.Models
 {
-    public required int Id { get; set; }
-    public required string Name { get; set; }
-    public required string Email { get; set; }
-    public required string PasswordHash { get; set; }
-    public string? PasswordSalt { get; set; }
-    public bool IsBlocked { get; set; } = false;
+    public class User : IdentityUser
+    {
+        public bool IsBlocked { get; set; } = false;
 
-    public ICollection<Login> Logins { get; set; } = [];
+        [Required]
+        public override string? UserName { get; set; }
+
+        [Required]
+        public override string? Email { get; set; }
+
+        [Required]
+        public override string? PasswordHash { get; set; }
+
+        public ICollection<Login> Logins { get; set; } = [];
+    }
 }

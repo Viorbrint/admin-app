@@ -2,9 +2,9 @@ namespace AdminApp.Models;
 
 public class Login
 {
-    public required int Id { get; set; }
-    public required DateTime Time { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public DateTime Time { get; set; } = DateTime.Now.ToUniversalTime();
 
-    public required int UserId { get; set; }
+    public required string UserId { get; set; }
     public required User User { get; set; }
 }

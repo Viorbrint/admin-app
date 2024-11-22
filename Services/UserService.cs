@@ -57,6 +57,14 @@ public class UserService(UserRepository userRepository)
         return true;
     }
 
+    public async Task<bool> AddLogin(string userId)
+    {
+        var user = await userRepository.Get(userId);
+        if (user == null)
+        {
+            return false;
+        }
+        await userRepository.AddLogin(user);
         return true;
     }
 }

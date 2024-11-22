@@ -56,5 +56,11 @@ public class UserRepository(ApplicationDbContext context)
         user.IsBlocked = false;
         await context.SaveChangesAsync();
     }
+
+    public async Task AddLogin(User user)
+    {
+        Login login = new() { UserId = user.Id, User = user };
+        user.Logins.Add(login);
+        await context.SaveChangesAsync();
     }
 }
