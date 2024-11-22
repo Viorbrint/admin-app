@@ -5,57 +5,58 @@ namespace AdminApp.Services;
 
 public class UserService(UserRepository userRepository)
 {
-    private readonly UserRepository _userRepository = userRepository;
-
     public async Task<List<User>> GetAll()
     {
-        return await _userRepository.GetAll();
+        return await userRepository.GetAll();
     }
 
-    public async Task<User?> Get(int userId)
+    public async Task<User?> Get(string userId)
     {
-        return await _userRepository.Get(userId);
+        return await userRepository.Get(userId);
     }
 
     public async Task<User> Create(User user)
     {
-        await _userRepository.Create(user);
+        await userRepository.Create(user);
         return user;
     }
 
-    public async Task<bool> Delete(int userId)
+    public async Task<bool> Delete(string userId)
     {
-        var user = await _userRepository.Get(userId);
+        var user = await userRepository.Get(userId);
         if (user == null)
         {
             return false;
         }
 
-        await _userRepository.Delete(userId);
+        await userRepository.Delete(userId);
         return true;
     }
 
-    public async Task<bool> Block(int userId)
+    public async Task<bool> Block(string userId)
     {
-        var user = await _userRepository.Get(userId);
+        var user = await userRepository.Get(userId);
         if (user == null)
         {
             return false;
         }
 
-        await _userRepository.Block(user);
+        await userRepository.Block(user);
         return true;
     }
 
-    public async Task<bool> Unblock(int userId)
+    public async Task<bool> Unblock(string userId)
     {
-        var user = await _userRepository.Get(userId);
+        var user = await userRepository.Get(userId);
         if (user == null)
         {
             return false;
         }
 
-        await _userRepository.Unblock(user);
+        await userRepository.Unblock(user);
+        return true;
+    }
+
         return true;
     }
 }
