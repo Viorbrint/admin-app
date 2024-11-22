@@ -1,0 +1,37 @@
+@using AdminApp.Models
+
+<table class="table table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th scope="col"><input type="checkbox" @onclick="OnSelectAll"></th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Last Seen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var user in Users)
+        {
+            <tr class="@GetRowClass(user)" @onclick="@(() => OnSelectUser(user.Email))">
+                <td><input type="checkbox" @bind="IsSelected[user.Email]"></td>
+                <td>@user.UserName</td>
+                <td>@user.Email</td>
+                <td>@(LastSeen.ContainsKey(user.Email) ? GetLocalTime(LastSeen[user.Email]) : "Unknown")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public List<User> Users { get; set; } = new();
+    [Parameter] public Dictionary<string, bool> IsSelected { get; set; } = new();
+    [Parameter] public Dictionary<string, DateTime> LastSeen { get; set; } = new();
+    [Parameter] public EventCallback OnSelectAll { get; set; }
+    [Parameter] public Action<string> OnSelectUser { get; set; }
+
+    [Parameter] public TimeSpan TimeZoneOffset {get; set;}
+
+    private static string GetRowClass(User user) => user.IsBlocked ? "text-muted text-decoration-line-through" : string.Empty;
+
+    private DateTime GetLocalTime(DateTime UTCTime) => UTCTime.Add(TimeZoneOffset);
+}
