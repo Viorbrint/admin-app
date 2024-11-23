@@ -1,6 +1,7 @@
 using AdminApp.Data;
 using AdminApp.Models;
-using AdminApp.Repositories;
+using AdminApp.Pages.Index;
+// using AdminApp.Repositories;
 using AdminApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +23,7 @@ builder
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
-        options.Lockout.AllowedForNewUsers = false;
+        options.Lockout.AllowedForNewUsers = true;
         options.User.RequireUniqueEmail = true;
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
@@ -43,7 +44,9 @@ builder.Services.AddScoped<LoginService>();
 builder.Services.AddScoped<RegisterService>();
 builder.Services.AddScoped<LogoutService>();
 builder.Services.AddScoped<UserService>();
-builder.Services.AddScoped<UserRepository>();
+builder.Services.AddScoped<UserState>();
+
+// builder.Services.AddScoped<UserRepository>();
 
 var app = builder.Build();
 

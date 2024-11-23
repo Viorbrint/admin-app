@@ -1,5 +1,4 @@
-@using AdminApp.Models
-
+@using AdminApp.Helpers
 <table class="table table-hover align-middle">
     <thead class="table-light">
         <tr>
@@ -9,29 +8,30 @@
             <th scope="col">Last Seen</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody class="table-group-divider">
         @foreach (var user in Users)
         {
-            <tr class="@GetRowClass(user)" @onclick="@(() => OnSelectUser(user.Email))">
-                <td><input type="checkbox" @bind="IsSelected[user.Email]"></td>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
-                <td>@(LastSeen.ContainsKey(user.Email) ? GetLocalTime(LastSeen[user.Email]) : "Unknown")</td>
+            <tr @onclick="@(() => OnSelectUser(user.Id))">
+                <td><input type="checkbox" @bind="IsSelected[user.Id]"></td>
+                <td class="@GetRowClass(user)">@user.UserName</td>
+                <td class="@GetRowClass(user)">@user.Email</td>
+                <td class="@GetRowClass(user)">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="@DateTimeHelper.toLocalTime(LastSeen[user.Id], TimeZoneOffset)">
+                        @DateTimeHelper.FormatDateTime(LastSeen[user.Id])
+                    </span>
+                    <Sparkline Data="GetUserActivity(user)" />
+                </td>
             </tr>
         }
     </tbody>
 </table>
 
-@code {
-    [Parameter] public List<User> Users { get; set; } = new();
-    [Parameter] public Dictionary<string, bool> IsSelected { get; set; } = new();
-    [Parameter] public Dictionary<string, DateTime> LastSeen { get; set; } = new();
-    [Parameter] public EventCallback OnSelectAll { get; set; }
-    [Parameter] public Action<string> OnSelectUser { get; set; }
-
-    [Parameter] public TimeSpan TimeZoneOffset {get; set;}
-
-    private static string GetRowClass(User user) => user.IsBlocked ? "text-muted text-decoration-line-through" : string.Empty;
-
-    private DateTime GetLocalTime(DateTime UTCTime) => UTCTime.Add(TimeZoneOffset);
-}
+<style>
+    table {
+        table-layout: fixed;
+        width: 100%;
+    }
+    table th, table td {
+        width: 25%;
+    }
+</style>

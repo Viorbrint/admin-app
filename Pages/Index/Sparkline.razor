@@ -1,0 +1,24 @@
+@code {
+    [Parameter]
+    public List<int> Data { get; set; } = new();
+
+    private string GetBarHeight(int value, int max)
+    {
+        if (max == 0) {
+            return $"{0}%";
+        }
+
+        return $"{(value * 100 / max)}%";
+    }
+}
+
+<div style="display: flex; gap: 2px; align-items: flex-end; height: 20px;">
+    @if (Data != null && Data.Any())
+    {
+        var max = Data.Max();
+        foreach (var value in Data)
+        {
+            <div style="width: 10px; height: @GetBarHeight(value, max); background: var(--bs-primary);"></div>
+        }
+    }
+</div>

@@ -2,44 +2,44 @@
 
 <PageTitle>AdminApp</PageTitle>
 
-<AuthorizeView>
-    <Authorized>
-        <AdminLayout>
-            @if (users == null)
-            {
-                <LoadingSpinner Message="Loading users, please wait..." />
-            }
-            else if (users.Count == 0)
+<AdminLayout>
+    @if (UserState.Users == null)
+    {
+        <LoadingSpinner Message="Loading users, please wait..." />
+    }
+    else
+    {
+        <div>
+            <UserActions 
+                OnBlock="@BlockSelectedUsers" 
+                OnUnblock="@UnblockSelectedUsers" 
+                OnDelete="@DeleteSelectedUsers" 
+                OnLogout="@Logout"
+                UserEmail="@_currentUserEmail" 
+                SetFilter="@SetFilter"
+                />
+
+            @if (UserState.Users.Count == 0)
             {
                 <NoUsersFound />
             }
-            else
+            else 
             {
-                <div>
-                    <UserActions 
-                        OnBlock="@BlockSelectedUsers" 
-                        OnUnblock="@UnblockSelectedUsers" 
-                        OnDelete="@DeleteSelectedUsers" 
-                        LogoutAction="@Logout" 
-                        @bind-FilterQuery="_filterQuery" />
-                    <UserTable 
-                        Users="_filteredUsers" 
-                        IsSelected="_isSelected" 
-                        LastSeen="_lastSeen" 
-                        OnSelectAll="SelectAllUsers" 
-                        OnSelectUser="SelectUser" />
-                </div>
+            <UserTable 
+                Users="UserState.Users" 
+                IsSelected="UserState.IsSelected" 
+                IsLockedOut="UserState.IsLockedOut"
+                LastSeen="UserState.LastSeen" 
+                OnSelectAll="UserState.ToggleAllSelections" 
+                OnSelectUser="UserState.ToggleUserSelection" />
             }
-        </AdminLayout>
-    </Authorized>
+        </div>
+    }
+</AdminLayout>
 
-    <NotAuthorized>
-        <section class="container py-5 min-vh-100 text-center">
-            <div class="alert alert-danger">
-                <h4 class="alert-heading">Access Denied</h4>
-                <p>You must be logged in to view this page.</p>
-                <a href="/login" class="btn btn-primary">Login</a>
-            </div>
-        </section>
-    </NotAuthorized>
-</AuthorizeView>
+<Notification 
+    IsSuccess="@IsSuccess"
+    IsShow="@IsNotificationShow"
+/>
+
+

@@ -5,8 +5,6 @@ namespace AdminApp.Models
 {
     public class User : IdentityUser
     {
-        public bool IsBlocked { get; set; } = false;
-
         [Required]
         public override string? UserName { get; set; }
 

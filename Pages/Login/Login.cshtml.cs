@@ -18,6 +18,11 @@ public class LoginModel(LoginService loginService) : PageModel
         {
             return LocalRedirect(Url.Content("~/"));
         }
+        else if (result.IsLockedOut)
+        {
+            LoginErrorMessage = "User account is locked out";
+            return Page();
+        }
         else
         {
             LoginErrorMessage = "Invalid email or password";

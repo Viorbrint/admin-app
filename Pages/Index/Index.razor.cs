@@ -1,158 +1,91 @@
-using AdminApp.Models;
 using AdminApp.Services;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 
 namespace AdminApp.Pages.Index;
 
 public partial class Index : ComponentBase
 {
     [Inject]
-    private NavigationManager? NavigationManager { get; set; }
+    private NavigationManager NavigationManager { get; set; } = null!;
 
     [Inject]
     private UserService UserService { get; set; } = null!;
 
     [Inject]
-    private IJSRuntime JSRuntime { get; set; } = null!;
+    private UserState UserState { get; set; } = null!;
 
-    private string _filterQuery = string.Empty;
+    private string _currentUserEmail = string.Empty;
 
-    private List<User> users = [];
-    private List<User> _filteredUsers = [];
-    private Dictionary<string, bool> _isSelected = [];
-    private Dictionary<string, DateTime> _lastSeen = [];
-
-    private string FilterQuery
+    private async void SetFilter(string query)
     {
-        get { return _filterQuery; }
-        set
-        {
-            _filterQuery = value;
-            FilterUsers();
-        }
+        Console.WriteLine(query);
+        UserState.FilterQuery = query;
+        await UpdateUsers();
     }
 
-    private TimeSpan _timeZoneOffset;
-
-    private DateTime GetLocalTime(DateTime UTCTime)
+    private async Task UpdateUsers()
     {
-        return UTCTime.Add(_timeZoneOffset);
+        var newUsers = await UserService.SearchUsersAsync(UserState.FilterQuery);
+        UserState.SetUsers(newUsers);
+        StateHasChanged();
     }
 
     protected override async Task OnInitializedAsync()
     {
-        users = await UserService.GetAll();
-        _filteredUsers = users;
+        await CheckUserStatus();
+        await UpdateUsers();
+        await base.OnInitializedAsync();
 
-        foreach (var user in users)
+        _currentUserEmail = (await UserService.GetCurrentUser()).Email;
+    }
+
+    private async Task CheckUserStatus()
+    {
+        var user = await UserService.GetCurrentUser();
+        if (user == null || await UserService.IsLockedOut(user))
         {
-            // TODO: bad
-            var lastLoginTime = user.Logins?.FirstOrDefault()?.Time ?? DateTime.MinValue;
-            _lastSeen.Add(user.Email, lastLoginTime);
-            _isSelected.Add(user.Email, false);
+            Logout();
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private async Task DoOperation(Func<string, Task<bool>> operation, string userId)
     {
-        if (firstRender)
+        await CheckUserStatus();
+        if (await operation(userId))
         {
-            int offsetMinutes = await JSRuntime.InvokeAsync<int>("getTimeZoneOffset");
-            _timeZoneOffset = TimeSpan.FromMinutes(offsetMinutes);
-
-            StateHasChanged();
-        }
-    }
-
-    private async Task BlockUser(string userId)
-    {
-        await UserService.Block(userId);
-        await LoadUsers();
-    }
-
-    private async Task UnblockUser(string userId)
-    {
-        await UserService.Unblock(userId);
-        await LoadUsers();
-    }
-
-    private async Task DeleteUser(string userId)
-    {
-        await UserService.Delete(userId);
-        await LoadUsers();
-    }
-
-    private async Task LoadUsers()
-    {
-        users = await UserService.GetAll();
-    }
-
-    private void FilterUsers()
-    {
-        if (string.IsNullOrEmpty(_filterQuery))
-        {
-            _filteredUsers = users;
+            ShowNotification(true);
         }
         else
         {
-            _filteredUsers = users
-                ?.Where(u =>
-                    u.UserName.Contains(_filterQuery, StringComparison.OrdinalIgnoreCase)
-                    || u.Email.Contains(_filterQuery, StringComparison.OrdinalIgnoreCase)
-                )
-                .ToList();
-        }
-    }
-
-    private void SelectUser(string email)
-    {
-        _isSelected[email] = !_isSelected[email];
-    }
-
-    private void SelectAllUsers()
-    {
-        foreach (var user in _filteredUsers)
-        {
-            _isSelected[user.Email] =
-                !_isSelected.ContainsKey(user.Email) || !_isSelected[user.Email];
+            ShowNotification(false);
         }
     }
 
     private async Task BlockSelectedUsers()
     {
-        foreach (
-            var user in _filteredUsers.Where(u =>
-                _isSelected.ContainsKey(u.Email) && _isSelected[u.Email]
-            )
-        )
+        foreach (var user in UserState.Users.Where(u => UserState.IsSelected[u.Id]))
         {
-            await BlockUser(user.Id);
+            await DoOperation(UserService.Block, user.Id);
         }
+        await UpdateUsers();
     }
 
     private async Task UnblockSelectedUsers()
     {
-        foreach (
-            var user in _filteredUsers.Where(u =>
-                _isSelected.ContainsKey(u.Email) && _isSelected[u.Email]
-            )
-        )
+        foreach (var user in UserState.Users.Where(u => UserState.IsSelected[u.Id]))
         {
-            await UnblockUser(user.Id);
+            await DoOperation(UserService.Unblock, user.Id);
         }
+        await UpdateUsers();
     }
 
     private async Task DeleteSelectedUsers()
     {
-        foreach (
-            var user in _filteredUsers.Where(u =>
-                _isSelected.ContainsKey(u.Email) && _isSelected[u.Email]
-            )
-        )
+        foreach (var user in UserState.Users.Where(u => UserState.IsSelected[u.Id]))
         {
-            await DeleteUser(user.Id);
+            await DoOperation(UserService.Delete, user.Id);
         }
+        await UpdateUsers();
     }
 
     private void Logout()
@@ -160,8 +93,23 @@ public partial class Index : ComponentBase
         NavigationManager.NavigateTo("/logout", true);
     }
 
-    private static string GetRowClass(User user)
+    private string? NotificationMessage;
+    private bool IsSuccess = true;
+
+    private bool IsNotificationShow = false;
+
+    public void ShowNotification(bool isSuccess = true)
     {
-        return user.IsBlocked ? "text-muted text-decoration-line-through" : string.Empty;
+        IsSuccess = isSuccess;
+        IsNotificationShow = true;
+        StateHasChanged();
+        _ = AutoHideNotificationAsync();
+    }
+
+    private async Task AutoHideNotificationAsync()
+    {
+        await Task.Delay(2000);
+        IsNotificationShow = false;
+        StateHasChanged();
     }
 }
