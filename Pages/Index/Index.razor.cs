@@ -18,7 +18,6 @@ public partial class Index : ComponentBase
 
     private async void SetFilter(string query)
     {
-        Console.WriteLine(query);
         UserState.FilterQuery = query;
         await UpdateUsers();
     }
@@ -50,8 +49,7 @@ public partial class Index : ComponentBase
 
     private async Task CheckUserStatus()
     {
-        var user = await UserService.GetCurrentUser();
-        if (user == null || await UserService.IsLockedOut(user))
+        if (await UserService.IsAccessDenied())
         {
             Logout();
         }

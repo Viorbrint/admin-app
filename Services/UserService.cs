@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using AdminApp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -87,14 +88,29 @@ public class UserService(UserManager<User> userManager, IHttpContextAccessor htt
     public async Task<User?> GetCurrentUser()
     {
         var user = httpContextAccessor.HttpContext?.User;
-        if (user == null)
+        if (user == null || !user.Identity?.IsAuthenticated == true)
             return null;
 
-        return await userManager.GetUserAsync(user);
+        var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+            return null;
+
+        return await userManager.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == userId);
     }
 
     public async Task<bool> IsLockedOut(User user)
     {
         return await userManager.IsLockedOutAsync(user);
+    }
+
+    public async Task<bool> IsAccessDenied()
+    {
+        var user = await GetCurrentUser();
+        if (user == null || user.LockoutEnd != null)
+        {
+            return true;
+        }
+
+        return false;
     }
 }
