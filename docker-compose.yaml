@@ -2,18 +2,23 @@ services:
   postgres:
     container_name: postgres
     image: postgres
-
     restart: always
-
     environment:
       - POSTGRES_USER=local
       - POSTGRES_PASSWORD=local
-
     volumes:
       - db-data:/var/lib/postgresql/data
-
     ports:
       - "5432:5432"
+
+  server:
+    build: .
+    depends_on:
+      - postgres
+    ports:
+      - "5111:5111"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
 
 volumes:
   db-data:
