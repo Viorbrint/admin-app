@@ -12,11 +12,21 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder
-            .Entity<Login>()
-            .HasOne(l => l.User)
-            .WithMany(u => u.Logins)
-            .HasForeignKey(l => l.UserId)
-            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Login>(entity =>
+        {
+            entity
+                .HasOne(l => l.User)
+                .WithMany(u => u.Logins)
+                .HasForeignKey(l => l.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(l => l.UserId).IsRequired();
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.HasIndex(u => u.NormalizedEmail).IsUnique();
+        });
     }
 }
