@@ -8,7 +8,7 @@
             <th scope="col">Last Seen</th>
         </tr>
     </thead>
-    <tbody class="table-group-divider">
+    <tbody>
         @foreach (var user in Users)
         {
             <tr @onclick="@(() => OnSelectUser(user.Id))">
@@ -16,7 +16,7 @@
                 <td class="@GetRowClass(user)">@user.UserName</td>
                 <td class="@GetRowClass(user)">@user.Email</td>
                 <td class="@GetRowClass(user)">
-                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="@DateTimeHelper.toLocalTime(LastSeen[user.Id], TimeZoneOffset)">
+                    <span data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="@DateTimeTooltip(user)">
                         @DateTimeHelper.FormatDateTime(LastSeen[user.Id])
                     </span>
                     <Sparkline Data="GetUserActivity(user)" />

@@ -1,3 +1,4 @@
+using AdminApp.Helpers;
 using AdminApp.Models;
 using AdminApp.Services;
 using Microsoft.AspNetCore.Components;
@@ -69,5 +70,11 @@ public partial class UserTable : ComponentBase
 
             StateHasChanged();
         }
+    }
+
+    private string DateTimeTooltip(User user)
+    {
+        var localTime = DateTimeHelper.toLocalTime(LastSeen[user.Id], TimeZoneOffset);
+        return LastSeen[user.Id] == DateTime.MinValue ? "Never" : localTime.ToString();
     }
 }
