@@ -16,8 +16,8 @@
     [Parameter] public EventCallback OnUnblock { get; set; }
     [Parameter] public EventCallback OnDelete { get; set; }
     [Parameter] public EventCallback OnLogout { get; set; }
-    [Parameter] public Action<string> SetFilter { get; set; }
-    [Parameter] public string UserEmail { get; set; }
+    [Parameter] public Action<string> SetFilter { get; set; } = null!;
+    [Parameter] public string UserEmail { get; set; } = null!;
 
     private CancellationTokenSource _cts = new();
     private string _searchText = string.Empty;

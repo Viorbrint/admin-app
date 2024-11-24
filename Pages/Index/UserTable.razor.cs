@@ -12,7 +12,7 @@ public partial class UserTable : ComponentBase
     private IJSRuntime JSRuntime { get; set; } = null!;
 
     [Inject]
-    private UserService UserService { get; set; }
+    private UserService UserService { get; set; } = null!;
 
     [Parameter]
     public List<User> Users { get; set; } = new();
@@ -30,7 +30,7 @@ public partial class UserTable : ComponentBase
     public EventCallback OnSelectAll { get; set; }
 
     [Parameter]
-    public Action<string> OnSelectUser { get; set; }
+    public Action<string> OnSelectUser { get; set; } = null!;
 
     public TimeSpan TimeZoneOffset { get; set; }
 
@@ -74,7 +74,7 @@ public partial class UserTable : ComponentBase
 
     private string DateTimeTooltip(User user)
     {
-        var localTime = DateTimeHelper.toLocalTime(LastSeen[user.Id], TimeZoneOffset);
+        var localTime = DateTimeHelper.ToLocalTime(LastSeen[user.Id], TimeZoneOffset);
         return LastSeen[user.Id] == DateTime.MinValue ? "Never" : localTime.ToString();
     }
 }

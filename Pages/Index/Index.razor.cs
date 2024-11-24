@@ -36,7 +36,16 @@ public partial class Index : ComponentBase
         await UpdateUsers();
         await base.OnInitializedAsync();
 
-        _currentUserEmail = (await UserService.GetCurrentUser()).Email;
+        var currentUser = await UserService.GetCurrentUser();
+
+        if (currentUser is not null && !string.IsNullOrEmpty(currentUser.Email))
+        {
+            _currentUserEmail = currentUser.Email;
+        }
+        else
+        {
+            _currentUserEmail = "Guest";
+        }
     }
 
     private async Task CheckUserStatus()
@@ -93,7 +102,6 @@ public partial class Index : ComponentBase
         NavigationManager.NavigateTo("/logout", true);
     }
 
-    private string? NotificationMessage;
     private bool IsSuccess = true;
 
     private bool IsNotificationShow = false;

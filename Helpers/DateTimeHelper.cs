@@ -30,7 +30,7 @@ public static class DateTimeHelper
         return $"{Math.Floor(timeDifference.TotalDays / 365)} year{(Math.Floor(timeDifference.TotalDays / 365) > 1 ? "s" : "")} ago";
     }
 
-    public static DateTime toLocalTime(DateTime utcTime, TimeSpan timeZoneOffset)
+    public static DateTime ToLocalTime(DateTime utcTime, TimeSpan timeZoneOffset)
     {
         return utcTime.Add(timeZoneOffset);
     }

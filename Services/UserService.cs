@@ -13,9 +13,10 @@ public class UserService(UserManager<User> userManager, IHttpContextAccessor htt
             .Users.Include(u => u.Logins.OrderByDescending(l => l.Time))
             .OrderByDescending(u => u.Logins.Any() ? u.Logins.Max(l => l.Time) : DateTime.MinValue)
             .Where(user =>
-                user.Email.Contains(normalizedSearchTerm)
-                || user.UserName.Contains(normalizedSearchTerm)
-                || user.NormalizedEmail.Contains(normalizedSearchTerm)
+                user.Email != null && user.Email.Contains(normalizedSearchTerm)
+                || user.UserName != null && user.UserName.Contains(normalizedSearchTerm)
+                || user.NormalizedEmail != null
+                    && user.NormalizedEmail.Contains(normalizedSearchTerm)
             )
             .ToListAsync();
 
@@ -28,28 +29,6 @@ public class UserService(UserManager<User> userManager, IHttpContextAccessor htt
         }
 
         return result;
-    }
-
-    public async Task<List<UserWithStatus>> GetAllWithStatus()
-    {
-        var users = await userManager
-            .Users.Include(u => u.Logins.OrderByDescending(l => l.Time))
-            .OrderByDescending(u => u.Logins.Any() ? u.Logins.Max(l => l.Time) : DateTime.MinValue)
-            .ToListAsync();
-        var result = new List<UserWithStatus>();
-
-        foreach (var user in users)
-        {
-            var isLockedOut = await userManager.IsLockedOutAsync(user);
-            result.Add(new UserWithStatus { User = user, IsLockedOut = isLockedOut });
-        }
-
-        return result;
-    }
-
-    public async Task<List<User>> GetAll()
-    {
-        return await userManager.Users.Include(u => u.Logins).ToListAsync();
     }
 
     public async Task<bool> Delete(string userId)
@@ -72,7 +51,6 @@ public class UserService(UserManager<User> userManager, IHttpContextAccessor htt
             return false;
         }
 
-        // TODO: Literal
         user.LockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
         var result = await userManager.UpdateAsync(user);
         return result.Succeeded;
@@ -108,7 +86,11 @@ public class UserService(UserManager<User> userManager, IHttpContextAccessor htt
 
     public async Task<User?> GetCurrentUser()
     {
-        return await userManager.GetUserAsync(httpContextAccessor.HttpContext?.User);
+        var user = httpContextAccessor.HttpContext?.User;
+        if (user == null)
+            return null;
+
+        return await userManager.GetUserAsync(user);
     }
 
     public async Task<bool> IsLockedOut(User user)
