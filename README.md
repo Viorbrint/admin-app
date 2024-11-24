@@ -1,5 +1,7 @@
 # AdminApp
 
+[![Watch the video](https://img.youtube.com/vi/AQJ6DK2_2ao/0.jpg)](https://youtu.be/AQJ6DK2_2ao)
+
 AdminApp is a web-based application for managing users with features like registration, authentication, and a user-friendly admin panel. Built with **ASP.NET Core** and styled using **Bootstrap**, it provides an efficient way to manage users' statuses and information.
 
 ## Features
