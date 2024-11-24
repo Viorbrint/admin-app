@@ -1,7 +1,6 @@
 using AdminApp.Data;
 using AdminApp.Models;
 using AdminApp.Pages.Index;
-// using AdminApp.Repositories;
 using AdminApp.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,9 +10,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+
+if (string.IsNullOrEmpty(databaseUrl))
+{
+    throw new InvalidOperationException("DATABASE_URL environment variable is not set.");
+}
+
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(databaseUrl));
 
 builder
     .Services.AddIdentity<User, IdentityRole>(options =>
@@ -45,8 +49,6 @@ builder.Services.AddScoped<RegisterService>();
 builder.Services.AddScoped<LogoutService>();
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<UserState>();
-
-// builder.Services.AddScoped<UserRepository>();
 
 var app = builder.Build();
 
